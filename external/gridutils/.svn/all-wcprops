@@ -1,0 +1,197 @@
+K 25
+svn:wc:ra_dav:version-url
+V 26
+/svn/!svn/ver/11/gridutils
+END
+configure
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/11/gridutils/configure
+END
+gridaverager.c
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/1/gridutils/gridaverager.c
+END
+xy2ij.c
+K 25
+svn:wc:ra_dav:version-url
+V 33
+/svn/!svn/ver/1/gridutils/xy2ij.c
+END
+CHANGELOG
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/11/gridutils/CHANGELOG
+END
+gridaverager.h
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/1/gridutils/gridaverager.h
+END
+getnodes.c
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/1/gridutils/getnodes.c
+END
+insertgrid.c
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/1/gridutils/insertgrid.c
+END
+.indent.pro
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/1/gridutils/.indent.pro
+END
+gridnodes.c
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/4/gridutils/gridnodes.c
+END
+kdtree.c
+K 25
+svn:wc:ra_dav:version-url
+V 34
+/svn/!svn/ver/4/gridutils/kdtree.c
+END
+gridnodes.h
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/1/gridutils/gridnodes.h
+END
+kdtree.h
+K 25
+svn:wc:ra_dav:version-url
+V 34
+/svn/!svn/ver/4/gridutils/kdtree.h
+END
+gridmap.c
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/!svn/ver/1/gridutils/gridmap.c
+END
+poly.c
+K 25
+svn:wc:ra_dav:version-url
+V 32
+/svn/!svn/ver/1/gridutils/poly.c
+END
+gridmap.h
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/!svn/ver/1/gridutils/gridmap.h
+END
+poly.h
+K 25
+svn:wc:ra_dav:version-url
+V 32
+/svn/!svn/ver/1/gridutils/poly.h
+END
+CUSTOMISE
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/!svn/ver/1/gridutils/CUSTOMISE
+END
+mkinstalldirs
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/1/gridutils/mkinstalldirs
+END
+subgrid.c
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/!svn/ver/1/gridutils/subgrid.c
+END
+LICENSE
+K 25
+svn:wc:ra_dav:version-url
+V 33
+/svn/!svn/ver/1/gridutils/LICENSE
+END
+makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/11/gridutils/makefile.in
+END
+configure.in
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/11/gridutils/configure.in
+END
+gridutilsconfig.h.in
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/1/gridutils/gridutilsconfig.h.in
+END
+getbound.c
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/1/gridutils/getbound.c
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 33
+/svn/!svn/ver/11/gridutils/README
+END
+gridbathy.c
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/!svn/ver/7/gridutils/gridbathy.c
+END
+nan.h
+K 25
+svn:wc:ra_dav:version-url
+V 31
+/svn/!svn/ver/8/gridutils/nan.h
+END
+setbathy.c
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/1/gridutils/setbathy.c
+END
+gucommon.c
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/1/gridutils/gucommon.c
+END
+gucommon.h
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/1/gridutils/gucommon.h
+END
+version.h
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/11/gridutils/version.h
+END
+install-sh
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/1/gridutils/install-sh
+END
