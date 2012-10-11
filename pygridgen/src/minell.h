@@ -25,8 +25,11 @@ typedef struct {
 } point;
 #endif
 
+#if !defined(_MINELL_STRUCT)
+#define _MINELL_STRUCT
 struct minell;
 typedef struct minell minell;
+#endif
 
 /* Note that minell_build() shuffles the input point array */
 minell* minell_build(int n, point p[]);

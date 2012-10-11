@@ -22,9 +22,7 @@
 #define _GRIDGEN_H
 
 #include "config.h"
-#if defined(HAVE_GRIDNODES_H)
 #include "gridnodes.h"
-#endif
 
 void gridgen_setverbose(int verbose);
 void gridgen_printversion(void);
@@ -32,10 +30,7 @@ void gridgen_printhelpalg(void);
 void gridgen_printhelpprm(void);
 void gridgen_generategrid(char* prm);
 
-#if defined(HAVE_GRIDNODES_H)
 
 gridnodes* gridgen_generategrid2(int nbdry, double xbdry[], double ybdry[], double beta[], int ul, int nx, int ny, int ngrid, double xgrid[], double ygrid[], int nnodes, int newton, double precision, int checksimplepoly, int thin, int nppe, int verbose, int* nsigmas, double** sigmas, int* nrect, double** xrect, double** yrect);
-
-#endif
 
 #endif                          /* _GRIDGEN_H */

@@ -22,19 +22,22 @@
 #include <string.h>
 #include "istack.h"
 
-static void istack_init(istack* s)
-{
-    s->n = 0;
-    s->nallocated = STACK_NSTART;
-    s->v = malloc(STACK_NSTART * sizeof(int));
-}
-
 istack* istack_create(void)
 {
     istack* s = malloc(sizeof(istack));
 
-    istack_init(s);
+    s->n = 0;
+    s->nallocated = STACK_NSTART;
+    s->v = malloc(STACK_NSTART * sizeof(int));
     return s;
+}
+
+void istack_destroy(istack* s)
+{
+    if (s != NULL) {
+        free(s->v);
+        free(s);
+    }
 }
 
 void istack_reset(istack* s)
@@ -55,7 +58,7 @@ int istack_contains(istack* s, int v)
 void istack_push(istack* s, int v)
 {
     if (s->n == s->nallocated) {
-        s->nallocated += STACK_NINC;
+        s->nallocated *= 2;
         s->v = realloc(s->v, s->nallocated * sizeof(int));
     }
 
@@ -69,10 +72,12 @@ int istack_pop(istack* s)
     return s->v[s->n];
 }
 
-void istack_destroy(istack* s)
+int istack_getnentries(istack* s)
 {
-    if (s != NULL) {
-        free(s->v);
-        free(s);
-    }
+    return s->n;
+}
+
+int* istack_getentries(istack* s)
+{
+    return s->v;
 }

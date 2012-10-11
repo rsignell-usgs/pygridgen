@@ -7,13 +7,14 @@
  * Author:         Pavel Sakov
  *                 CSIRO Marine Research
  *
- * Purpose:        Delaunay triangulation - a wrapper to triangulate().
+ * Purpose:        Delaunay triangulation - a wrapper to triangulate()
  *
- * Description:    This is a stripped version from the Natural Neigbours 
- *                 interpolation library `nn' available at
- *                 http://www.marine.csiro.au/~sakov/nn.tar.gz
+ * Description:    None
  *
- * Revisions:      None
+ * Revisions:      10/06/2003 PS: delaunay_build(); delaunay_destroy();
+ *                 struct delaunay: from now on, only shallow copy of the
+ *                 input data is contained in struct delaunay. This saves
+ *                 memory and is consistent with libcsa.
  *
  *****************************************************************************/
 
@@ -23,10 +24,22 @@
 #include <math.h>
 #include <string.h>
 #include <limits.h>
+#include <float.h>
 #include "triangle.h"
+#include "istack.h"
+#include "nan.h"
 #include "delaunay.h"
+#include "nn.h"
+#include "nn_internal.h"
 
-extern int tr_verbose;
+/*
+ * This parameter is used in search of tricircles containing a given point:
+ *   if there are no more triangles than N_SEARCH_TURNON
+ *     do linear search
+ *   else
+ *     do more complicated stuff
+ */
+#define N_SEARCH_TURNON 20
 
 static void tio_init(struct triangulateio* tio)
 {
@@ -87,6 +100,131 @@ static void tio_destroy(struct triangulateio* tio)
         free(tio->normlist);
 }
 
+static delaunay* delaunay_create()
+{
+    delaunay* d = malloc(sizeof(delaunay));
+
+    d->npoints = 0;
+    d->points = NULL;
+    d->xmin = DBL_MAX;
+    d->xmax = -DBL_MAX;
+    d->ymin = DBL_MAX;
+    d->ymax = -DBL_MAX;
+    d->ntriangles = 0;
+    d->triangles = NULL;
+    d->circles = NULL;
+    d->neighbours = NULL;
+    d->n_point_triangles = NULL;
+    d->point_triangles = NULL;
+    d->nedges = 0;
+    d->edges = NULL;
+    d->flags = NULL;
+    d->first_id = -1;
+    d->t_in = NULL;
+    d->t_out = NULL;
+
+    return d;
+}
+
+static void tio2delaunay(struct triangulateio* tio_out, delaunay* d)
+{
+    int i, j;
+
+    /*
+     * I assume that all input points appear in tio_out in the same order as 
+     * they were written to tio_in. I have seen no exceptions so far, even
+     * if duplicate points were presented. Just in case, let us make a couple
+     * of checks. 
+     */
+    assert(tio_out->numberofpoints == d->npoints);
+    assert(tio_out->pointlist[2 * d->npoints - 2] == d->points[d->npoints - 1].x && tio_out->pointlist[2 * d->npoints - 1] == d->points[d->npoints - 1].y);
+
+    for (i = 0, j = 0; i < d->npoints; ++i) {
+        point* p = &d->points[i];
+
+        if (p->x < d->xmin)
+            d->xmin = p->x;
+        if (p->x > d->xmax)
+            d->xmax = p->x;
+        if (p->y < d->ymin)
+            d->ymin = p->y;
+        if (p->y > d->ymax)
+            d->ymax = p->y;
+    }
+    if (nn_verbose) {
+        fprintf(stderr, "input:\n");
+        for (i = 0, j = 0; i < d->npoints; ++i) {
+            point* p = &d->points[i];
+
+            fprintf(stderr, "  %d: %15.7g %15.7g %15.7g\n", i, p->x, p->y, p->z);
+        }
+    }
+
+    d->ntriangles = tio_out->numberoftriangles;
+    if (d->ntriangles > 0) {
+        d->triangles = malloc(d->ntriangles * sizeof(triangle));
+        d->neighbours = malloc(d->ntriangles * sizeof(triangle_neighbours));
+        d->circles = malloc(d->ntriangles * sizeof(circle));
+        d->n_point_triangles = calloc(d->npoints, sizeof(int));
+        d->point_triangles = malloc(d->npoints * sizeof(int*));
+        d->flags = calloc(d->ntriangles, sizeof(int));
+    }
+
+    if (nn_verbose)
+        fprintf(stderr, "triangles:\n");
+    for (i = 0; i < d->ntriangles; ++i) {
+        int offset = i * 3;
+        triangle* t = &d->triangles[i];
+        triangle_neighbours* n = &d->neighbours[i];
+        circle* c = &d->circles[i];
+
+        t->vids[0] = tio_out->trianglelist[offset];
+        t->vids[1] = tio_out->trianglelist[offset + 1];
+        t->vids[2] = tio_out->trianglelist[offset + 2];
+
+        n->tids[0] = tio_out->neighborlist[offset];
+        n->tids[1] = tio_out->neighborlist[offset + 1];
+        n->tids[2] = tio_out->neighborlist[offset + 2];
+
+        assert(circle_build1(c, &d->points[t->vids[0]], &d->points[t->vids[1]], &d->points[t->vids[2]]));
+
+        if (nn_verbose)
+            fprintf(stderr, "  %d: (%d,%d,%d)\n", i, t->vids[0], t->vids[1], t->vids[2]);
+    }
+
+    for (i = 0; i < d->ntriangles; ++i) {
+        triangle* t = &d->triangles[i];
+
+        for (j = 0; j < 3; ++j)
+            d->n_point_triangles[t->vids[j]]++;
+    }
+    if (d->ntriangles > 0) {
+        for (i = 0; i < d->npoints; ++i) {
+            if (d->n_point_triangles[i] > 0)
+                d->point_triangles[i] = malloc(d->n_point_triangles[i] * sizeof(int));
+            else
+                d->point_triangles[i] = NULL;
+            d->n_point_triangles[i] = 0;
+        }
+    }
+    for (i = 0; i < d->ntriangles; ++i) {
+        triangle* t = &d->triangles[i];
+
+        for (j = 0; j < 3; ++j) {
+            int vid = t->vids[j];
+
+            d->point_triangles[vid][d->n_point_triangles[vid]] = i;
+            d->n_point_triangles[vid]++;
+        }
+    }
+
+    if (tio_out->edgelist != NULL) {
+        d->nedges = tio_out->numberofedges;
+        d->edges = malloc(d->nedges * 2 * sizeof(int));
+        memcpy(d->edges, tio_out->edgelist, d->nedges * 2 * sizeof(int));
+    }
+}
+
 /* Builds Delaunay triangulation of the given array of points.
  *
  * @param np Number of points
@@ -99,7 +237,7 @@ static void tio_destroy(struct triangulateio* tio)
  */
 delaunay* delaunay_build(int np, point points[], int ns, int segments[], int nh, double holes[])
 {
-    delaunay* d = malloc(sizeof(delaunay));
+    delaunay* d = delaunay_create();
     struct triangulateio tio_in;
     struct triangulateio tio_out;
     char cmd[64] = "eznC";
@@ -135,14 +273,14 @@ delaunay* delaunay_build(int np, point points[], int ns, int segments[], int nh,
 
     tio_init(&tio_out);
 
-    if (!tr_verbose)
+    if (!nn_verbose)
         strcat(cmd, "Q");
-    else if (tr_verbose > 1)
+    else if (nn_verbose > 1)
         strcat(cmd, "VV");
     if (ns != 0)
         strcat(cmd, "p");
 
-    if (tr_verbose)
+    if (nn_verbose)
         fflush(stderr);
 
     /*
@@ -150,87 +288,13 @@ delaunay* delaunay_build(int np, point points[], int ns, int segments[], int nh,
      */
     triangulate(cmd, &tio_in, &tio_out, NULL);
 
-    if (tr_verbose)
+    if (nn_verbose)
         fflush(stderr);
 
-    /*
-     * I assume that all input points appear in tio_out in the same order as 
-     * they were written to tio_in. I have seen no exceptions so far, even
-     * if duplicate points were presented. Just to be reasonably sure, let
-     * us make a couple of checks. 
-     */
-    assert(tio_out.numberofpoints == np);
-    assert(tio_out.pointlist[2 * np - 2] == points[np - 1].x && tio_out.pointlist[2 * np - 1] == points[np - 1].y);
-
     d->npoints = np;
-    d->points = malloc(np * sizeof(point));
-    for (i = 0, j = 0; i < np; ++i) {
-        point* p = &d->points[i];
+    d->points = points;
 
-        p->x = tio_out.pointlist[j++];
-        p->y = tio_out.pointlist[j++];
-        p->z = points[i].z;
-    }
-    if (tr_verbose) {
-        fprintf(stderr, "input:\n");
-        for (i = 0, j = 0; i < np; ++i) {
-            point* p = &d->points[i];
-
-            fprintf(stderr, "  %d: %15.7g %15.7g %15.7g\n", i, p->x, p->y, p->z);
-        }
-    }
-
-    d->ntriangles = tio_out.numberoftriangles;
-    d->triangles = malloc(d->ntriangles * sizeof(triangle));
-
-    if (tr_verbose)
-        fprintf(stderr, "triangles:\n");
-    for (i = 0; i < d->ntriangles; ++i) {
-        int offset = i * 3;
-        triangle* t = &d->triangles[i];
-
-        t->vids[0] = tio_out.trianglelist[offset];
-        t->vids[1] = tio_out.trianglelist[offset + 1];
-        t->vids[2] = tio_out.trianglelist[offset + 2];
-
-        if (tr_verbose)
-            fprintf(stderr, "  %d: (%d,%d,%d)\n", i, t->vids[0], t->vids[1], t->vids[2]);
-    }
-
-    d->n_point_triangles = calloc(d->npoints, sizeof(int));
-    for (i = 0; i < d->ntriangles; ++i) {
-        triangle* t = &d->triangles[i];
-
-        for (j = 0; j < 3; ++j)
-            d->n_point_triangles[t->vids[j]]++;
-    }
-    d->point_triangles = malloc(d->npoints * sizeof(int*));
-    for (i = 0; i < d->npoints; ++i) {
-        if (d->n_point_triangles[i] > 0)
-            d->point_triangles[i] = malloc(d->n_point_triangles[i] * sizeof(int));
-        else
-            d->point_triangles[i] = NULL;
-        d->n_point_triangles[i] = 0;
-    }
-    for (i = 0; i < d->ntriangles; ++i) {
-        triangle* t = &d->triangles[i];
-
-        for (j = 0; j < 3; ++j) {
-            int vid = t->vids[j];
-
-            d->point_triangles[vid][d->n_point_triangles[vid]] = i;
-            d->n_point_triangles[vid]++;
-        }
-    }
-
-    if (tio_out.edgelist != NULL) {
-        d->nedges = tio_out.numberofedges;
-        d->edges = malloc(d->nedges * 2 * sizeof(int));
-        memcpy(d->edges, tio_out.edgelist, d->nedges * 2 * sizeof(int));
-    } else {
-        d->nedges = 0;
-        d->edges = NULL;
-    }
+    tio2delaunay(&tio_out, d);
 
     tio_destroy(&tio_in);
     tio_destroy(&tio_out);
@@ -238,22 +302,226 @@ delaunay* delaunay_build(int np, point points[], int ns, int segments[], int nh,
     return d;
 }
 
-/* Releases memory engaged in the Delaunay triangulation structure.
+/* Destroys Delaunay triangulation.
  *
  * @param d Structure to be destroyed
  */
 void delaunay_destroy(delaunay* d)
 {
-    int i;
+    if (d == NULL)
+        return;
 
-    for (i = 0; i < d->npoints; ++i)
-        if (d->point_triangles[i] != NULL)
-            free(d->point_triangles[i]);
+    if (d->point_triangles != NULL) {
+        int i;
+
+        for (i = 0; i < d->npoints; ++i)
+            if (d->point_triangles[i] != NULL)
+                free(d->point_triangles[i]);
+        free(d->point_triangles);
+    }
     if (d->nedges > 0)
         free(d->edges);
-    free(d->point_triangles);
-    free(d->n_point_triangles);
-    free(d->triangles);
-    free(d->points);
+    if (d->n_point_triangles != NULL)
+        free(d->n_point_triangles);
+    if (d->flags != NULL)
+        free(d->flags);
+    if (d->circles != NULL)
+        free(d->circles);
+    if (d->neighbours != NULL)
+        free(d->neighbours);
+    if (d->triangles != NULL)
+        free(d->triangles);
+    if (d->t_in != NULL)
+        istack_destroy(d->t_in);
+    if (d->t_out != NULL)
+        istack_destroy(d->t_out);
     free(d);
+}
+
+/* Returns whether the point p is on the right side of the vector (p0, p1).
+ */
+static int onrightside(point* p, point* p0, point* p1)
+{
+    return (p1->x - p->x) * (p0->y - p->y) > (p0->x - p->x) * (p1->y - p->y);
+}
+
+/* Finds triangle specified point belongs to (if any).
+ *
+ * @param d Delaunay triangulation
+ * @param p Point to be mapped
+ * @param seed Triangle index to start with
+ * @return Triangle id if successful, -1 otherwhile
+ */
+int delaunay_xytoi(delaunay* d, point* p, int id)
+{
+    triangle* t;
+    int i;
+
+    if (p->x < d->xmin || p->x > d->xmax || p->y < d->ymin || p->y > d->ymax)
+        return -1;
+
+    if (id < 0 || id > d->ntriangles)
+        id = 0;
+    t = &d->triangles[id];
+    do {
+        for (i = 0; i < 3; ++i) {
+            int i1 = (i + 1) % 3;
+
+            if (onrightside(p, &d->points[t->vids[i]], &d->points[t->vids[i1]])) {
+                id = d->neighbours[id].tids[(i + 2) % 3];
+                if (id < 0)
+                    return id;
+                t = &d->triangles[id];
+                break;
+            }
+        }
+    } while (i < 3);
+
+    return id;
+}
+
+/* Finds all tricircles specified point belongs to.
+ *
+ * @param d Delaunay triangulation
+ * @param p Point to be mapped
+ * @param n Pointer to the number of tricircles within `d' containing `p'
+ *          (output)
+ * @param out Pointer to an array of indices of the corresponding triangles 
+ *            [n] (output)
+ *
+ * There is a standard search procedure involving search through triangle
+ * neighbours (not through vertex neighbours). It must be a bit faster due to
+ * the smaller number of triangle neighbours (3 per triangle) but may fail
+ * for a point outside convex hall.
+ *
+ * We may wish to modify this procedure in future: first check if the point
+ * is inside the convex hall, and depending on that use one of the two
+ * search algorithms. It not 100% clear though whether this will lead to a
+ * substantial speed gains because of the check on convex hall involved.
+ */
+void delaunay_circles_find(delaunay* d, point* p, int* n, int** out)
+{
+    /*
+     * This flag was introduced as a hack to handle some degenerate cases. It 
+     * is set to 1 only if the triangle associated with the first circle is
+     * already known to contain the point. In this case the circle is assumed 
+     * to contain the point without a check. In my practice this turned
+     * useful in some cases when point p coincided with one of the vertices
+     * of a thin triangle. 
+     */
+    int contains = 0;
+    int i;
+
+    if (d->t_in == NULL) {
+        d->t_in = istack_create();
+        d->t_out = istack_create();
+    }
+
+    /*
+     * if there are only a few data points, do linear search
+     */
+    if (d->ntriangles <= N_SEARCH_TURNON) {
+        istack_reset(d->t_out);
+
+        for (i = 0; i < d->ntriangles; ++i) {
+            if (circle_contains(&d->circles[i], p)) {
+                istack_push(d->t_out, i);
+            }
+        }
+
+        *n = d->t_out->n;
+        *out = d->t_out->v;
+
+        return;
+    }
+    /*
+     * otherwise, do a more complicated stuff
+     */
+
+    /*
+     * It is important to have a reasonable seed here. If the last search
+     * was successful -- start with the last found tricircle, otherwhile (i) 
+     * try to find a triangle containing p; if fails then (ii) check
+     * tricircles from the last search; if fails then (iii) make linear
+     * search through all tricircles 
+     */
+    if (d->first_id < 0 || !circle_contains(&d->circles[d->first_id], p)) {
+        /*
+         * if any triangle contains p -- start with this triangle 
+         */
+        d->first_id = delaunay_xytoi(d, p, d->first_id);
+        contains = (d->first_id >= 0);
+
+        /*
+         * if no triangle contains p, there still is a chance that it is
+         * inside some of circumcircles 
+         */
+        if (d->first_id < 0) {
+            int nn = d->t_out->n;
+            int tid = -1;
+
+            /*
+             * first check results of the last search 
+             */
+            for (i = 0; i < nn; ++i) {
+                tid = d->t_out->v[i];
+                if (circle_contains(&d->circles[tid], p))
+                    break;
+            }
+            /*
+             * if unsuccessful, search through all circles 
+             */
+            if (tid < 0 || i == nn) {
+                double nt = d->ntriangles;
+
+                for (tid = 0; tid < nt; ++tid) {
+                    if (circle_contains(&d->circles[tid], p))
+                        break;
+                }
+                if (tid == nt) {
+                    istack_reset(d->t_out);
+                    *n = 0;
+                    *out = NULL;
+                    return;     /* failed */
+                }
+            }
+            d->first_id = tid;
+        }
+    }
+
+    istack_reset(d->t_in);
+    istack_reset(d->t_out);
+
+    istack_push(d->t_in, d->first_id);
+    d->flags[d->first_id] = 1;
+
+    /*
+     * main cycle 
+     */
+    while (d->t_in->n > 0) {
+        int tid = istack_pop(d->t_in);
+        triangle* t = &d->triangles[tid];
+
+        if (contains || circle_contains(&d->circles[tid], p)) {
+            istack_push(d->t_out, tid);
+            for (i = 0; i < 3; ++i) {
+                int vid = t->vids[i];
+                int nt = d->n_point_triangles[vid];
+                int j;
+
+                for (j = 0; j < nt; ++j) {
+                    int ntid = d->point_triangles[vid][j];
+
+                    if (d->flags[ntid] == 0) {
+                        istack_push(d->t_in, ntid);
+                        d->flags[ntid] = 1;
+                    }
+                }
+            }
+        }
+        contains = 0;
+    }
+
+    *n = d->t_out->n;
+    *out = d->t_out->v;
 }

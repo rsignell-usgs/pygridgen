@@ -16,7 +16,6 @@
 #define _GUCOMMON_H
 
 extern int gu_verbose;          /* set verbosity from your application */
-extern char* gu_version;
 
 void gu_quit(char* format, ...);
 FILE* gu_fopen(const char* path, const char* mode);

@@ -19,7 +19,6 @@
 #include <limits.h>
 #include <assert.h>
 #include <errno.h>
-#include "version.h"
 
 #define BUFSIZE 10240
 

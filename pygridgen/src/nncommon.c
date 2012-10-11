@@ -45,7 +45,6 @@ int nn_verbose = 0;
 int nn_test_vertice = -1;
 NN_RULE nn_rule = SIBSON;
 
-#include "version.h"
 
 void nn_quit(char* format, ...)
 {
