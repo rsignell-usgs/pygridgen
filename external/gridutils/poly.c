@@ -105,7 +105,7 @@ static void poly_recalcextent(poly* pl)
 void poly_addpoint(poly* pl, double x, double y)
 {
     if (isnan(x) || isnan(y)) {
-        fflush(stdout);
+        // fflush(stdout);
         fprintf(stderr, "error: poly_addpoint(): NaN detected\n");
         exit(1);
     }

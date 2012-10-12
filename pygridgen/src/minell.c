@@ -74,6 +74,7 @@
 #define BIGNUMBER 1.0e+100
 #define SECANT_COUNT_MAX 30
 #define SECANT_EPS 5.0e-11
+#define M_PI 3.14159265358979323846
 
 static int me_seed = 1;
 static int me_classic = 0;
@@ -782,10 +783,16 @@ static void minell_info(minell* me, FILE* f)
 {
     int i;
 
+    fprintf(f, "minimal ellipse: info:\n");
+    fprintf(f, "  defined by %d points:\n", me->n);
     for (i = 0; i < me->n; ++i) {
         point* p = me->points[i];
 
+        fprintf(f, "    point %d: (%.15g, %.15g)\n", i, p->x, p->y);
     }
+    fprintf(f, "  center = (%.15g, %.15g)\n", me->c.x, me->c.y);
+    fprintf(f, "  semiaxis a = %.15g (inclination = %.15g deg)\n", me->a, me->theta * 180.0 / M_PI);
+    fprintf(f, "  semiaxis b = %.15g\n", me->b);
 }
 
 /* Recursively calculates minimal ellipse by Welzl's algorithm.
@@ -801,10 +808,16 @@ static void minell_calc_welzl(minell* me, int n, point* points[], int nb, point*
     if (me_verbose > 1) {
         int i;
 
+        fprintf(stderr, "%d: %d | %d\n", count, n, nb);
+        fprintf(stderr, "  pointsb:\n");
+        fprintf(stderr, "    x = [");
         for (i = 0; i < nb; ++i)
-            // fprintf(stderr, "%.4f ", pointsb[i]->x);
+            fprintf(stderr, "%.4f ", pointsb[i]->x);
+        fprintf(stderr, "];\n");
+        fprintf(stderr, "    y = [");
         for (i = 0; i < nb; ++i)
-            // fprintf(stderr, "%.4f ", pointsb[i]->y);
+            fprintf(stderr, "%.4f ", pointsb[i]->y);
+        fprintf(stderr, "];\n");
 
         fflush(stderr);
     }
@@ -831,27 +844,27 @@ static void minell_calc_welzl(minell* me, int n, point* points[], int nb, point*
     if (me_verbose > 1) {
         int i;
 
-        // fprintf(stderr, "%d: %d | %d\n", count, n, nb);
-        // fprintf(stderr, "  me->points:\n");
-        // fprintf(stderr, "    x = [");
-        // for (i = 0; i < me->n; ++i)
-            // fprintf(stderr, "%.4f ", me->points[i]->x);
-        // fprintf(stderr, "];\n");
-        // fprintf(stderr, "    y = [");
-        // for (i = 0; i < me->n; ++i)
-            // fprintf(stderr, "%.4f ", me->points[i]->y);
-        // fprintf(stderr, "];\n");
+        fprintf(stderr, "%d: %d | %d\n", count, n, nb);
+        fprintf(stderr, "  me->points:\n");
+        fprintf(stderr, "    x = [");
+        for (i = 0; i < me->n; ++i)
+            fprintf(stderr, "%.4f ", me->points[i]->x);
+        fprintf(stderr, "];\n");
+        fprintf(stderr, "    y = [");
+        for (i = 0; i < me->n; ++i)
+            fprintf(stderr, "%.4f ", me->points[i]->y);
+        fprintf(stderr, "];\n");
     }
 
     if (minell_containspoint(me, p)) {
         if (me_verbose > 1) {
-            // fprintf(stderr, "  p = (%.4f, %.4f) : IN\n", p->x, p->y);
+            fprintf(stderr, "  p = (%.4f, %.4f) : IN\n", p->x, p->y);
             fflush(stderr);
         }
         return;
     } else {
         if (me_verbose > 1) {
-            // fprintf(stderr, "  p = (%.4f, %.4f) : OUT\n", p->x, p->y);
+            fprintf(stderr, "  p = (%.4f, %.4f) : OUT\n", p->x, p->y);
             fflush(stderr);
         }
 
@@ -898,7 +911,7 @@ static void minell_calc(minell* me, int n, point* points[])
         }
 
         if (me_verbose > 1)
-            // fprintf(stderr, "*** calc --> welzl ***\n");
+            fprintf(stderr, "*** calc --> welzl ***\n");
 
         nin = 0;
 
@@ -991,9 +1004,9 @@ static void minell_quit(char* format, ...)
     va_list args;
 
     fflush(stdout);
-    // fprintf(stderr, "error: minimal ellipse: ");
+    fprintf(stderr, "error: minimal ellipse: ");
     va_start(args, format);
-    v// fprintf(stderr, format, args);
+    vfprintf(stderr, format, args);
     va_end(args);
 
     exit(1);
@@ -1001,18 +1014,18 @@ static void minell_quit(char* format, ...)
 
 static void minell_stats(minell* me, FILE* f)
 {
-    // fprintf(f, "minimal ellipse: stats:\n");
-    // fprintf(f, "  built over %d points\n", me->minell_npoints);
-    // fprintf(f, "  by %sWelzl's algorithm\n", (me_classic) ? "" : "modified ");
+    fprintf(f, "minimal ellipse: stats:\n");
+    fprintf(f, "  built over %d points\n", me->minell_npoints);
+    fprintf(f, "  by %sWelzl's algorithm\n", (me_classic) ? "" : "modified ");
     if (me_verbose && me_seed != 1)
-        // fprintf(f, "  seed = %d\n", me_seed);
-    // fprintf(f, "  %d calls to Welzl's procedure\n", me->minell_calc_count);
-    // fprintf(f, "  computed by 3 points: %d times\n", me->minell_calc3_count);
-    // fprintf(f, "  computed by 4 points: %d times\n", me->minell_calc4_count);
-    // fprintf(f, "  computed by 5 points: %d times\n", me->minell_calc5_count);
-    // fprintf(f, "  in-ellipse test by 3 points: %d times\n", me->minell_eval3_count);
-    // fprintf(f, "  in-ellipse test by 4 points: %d times\n", me->minell_eval4_count);
-    // fprintf(f, "  in-ellipse test by 5 points: %d times\n", me->minell_eval5_count);
+        fprintf(f, "  seed = %d\n", me_seed);
+    fprintf(f, "  %d calls to Welzl's procedure\n", me->minell_calc_count);
+    fprintf(f, "  computed by 3 points: %d times\n", me->minell_calc3_count);
+    fprintf(f, "  computed by 4 points: %d times\n", me->minell_calc4_count);
+    fprintf(f, "  computed by 5 points: %d times\n", me->minell_calc5_count);
+    fprintf(f, "  in-ellipse test by 3 points: %d times\n", me->minell_eval3_count);
+    fprintf(f, "  in-ellipse test by 4 points: %d times\n", me->minell_eval4_count);
+    fprintf(f, "  in-ellipse test by 5 points: %d times\n", me->minell_eval5_count);
 }
 
 static void usage()
@@ -1208,7 +1221,7 @@ int main(int argc, char* argv[])
     parse_commandline(argc, argv, &fname);
 
     if (fname == NULL) {
-        // fprintf(stderr, "error: minimal ellipse: no input data\n");
+        fprintf(stderr, "error: minimal ellipse: no input data\n");
         usage();
     }
 
@@ -1229,7 +1242,7 @@ int main(int argc, char* argv[])
             long dt = 1000000 * (tv1.tv_sec - tv0.tv_sec) + tv1.tv_usec - tv0.tv_usec;
 
             minell_stats(me, stdout);
-            // fprintf(stdout, "minimal ellipse: elapsed time = %ld us\n", dt);
+            fprintf(stdout, "minimal ellipse: elapsed time = %ld us\n", dt);
         }
 
         minell_destroy(me);
@@ -1260,14 +1273,14 @@ int main(int argc, char* argv[])
 
         gettimeofday(&tv1, &tz);
         dt = 1000000 * (tv1.tv_sec - tv0.tv_sec) + tv1.tv_usec - tv0.tv_usec;
-        // fprintf(stdout, "minimal ellipse:\n");
-        // fprintf(stdout, "  average build time = %ld us\n", dt / NTEST);
-        // fprintf(stdout, "  average number of calls to Welzl's procedure = %d\n", minell_calc_count / NTEST);
-        // fprintf(stdout, "  average number of ellipses built by 3 support points = %d\n", minell_calc3_count / NTEST);
-        // fprintf(stdout, "  average number of ellipses built by 4 support points = %d\n", minell_calc4_count / NTEST);
-        // fprintf(stdout, "  average number of in-ellipse test by 3 support points = %d\n", minell_eval3_count / NTEST);
-        // fprintf(stdout, "  average number of in-ellipse test by 4 support points = %d\n", minell_eval4_count / NTEST);
-        // fprintf(stdout, "  average number of in-ellipse test by 5 support points = %d\n", minell_eval5_count / NTEST);
+        fprintf(stdout, "minimal ellipse:\n");
+        fprintf(stdout, "  average build time = %ld us\n", dt / NTEST);
+        fprintf(stdout, "  average number of calls to Welzl's procedure = %d\n", minell_calc_count / NTEST);
+        fprintf(stdout, "  average number of ellipses built by 3 support points = %d\n", minell_calc3_count / NTEST);
+        fprintf(stdout, "  average number of ellipses built by 4 support points = %d\n", minell_calc4_count / NTEST);
+        fprintf(stdout, "  average number of in-ellipse test by 3 support points = %d\n", minell_eval3_count / NTEST);
+        fprintf(stdout, "  average number of in-ellipse test by 4 support points = %d\n", minell_eval4_count / NTEST);
+        fprintf(stdout, "  average number of in-ellipse test by 5 support points = %d\n", minell_eval5_count / NTEST);
     }
 
     if (points != NULL)

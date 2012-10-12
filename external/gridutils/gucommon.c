@@ -29,7 +29,7 @@ void gu_quit(char* format, ...)
 {
     va_list args;
 
-    fflush(stdout);
+    // fflush(stdout);
     fprintf(stderr, "\nerror: gridutils: ");
     va_start(args, format);
     vfprintf(stderr, format, args);

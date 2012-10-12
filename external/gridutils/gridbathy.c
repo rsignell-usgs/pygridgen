@@ -137,7 +137,7 @@ static void quit(char* format, ...)
 {
     va_list args;
 
-    fflush(stdout);
+    // fflush(stdout);
     fprintf(stderr, "error: gridbathy: ");
     va_start(args, format);
     vfprintf(stderr, format, args);
@@ -415,7 +415,7 @@ int main(int argc, char* argv[])
          */
         if (gu_verbose) {
             fprintf(stderr, "## triangulating...");
-            fflush(stdout);
+            // fflush(stdout);
         }
         d = delaunay_build(nbathy, pbathy, 0, NULL, 0, NULL);
         if (gu_verbose) {
@@ -499,7 +499,7 @@ int main(int argc, char* argv[])
                     printf("NaN\n");
                 else
                     printf("%.2f\n", sum / (double) count);
-                fflush(stdout);
+                // fflush(stdout);
             }
         }
     }

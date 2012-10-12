@@ -3133,7 +3133,7 @@ void info()
 
 void internalerror()
 {
-  fflush(stdout);
+  // fflush(stdout);
   fprintf(stderr, "  Please report this bug to jrs@cs.berkeley.edu\n");
   fprintf(stderr, "  Include the message above, your input data set, and the exact\n");
   fprintf(stderr, "    command line you used to run Triangle.\n");

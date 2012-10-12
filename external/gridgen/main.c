@@ -27,7 +27,7 @@ static void quit(char* format, ...)
 {
     va_list args;
 
-    fflush(stdout);
+    // fflush(stdout);
 
     fprintf(stderr, "error: ");
     va_start(args, format);

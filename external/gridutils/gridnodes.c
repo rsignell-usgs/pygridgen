@@ -376,7 +376,7 @@ void gridnodes_validate(gridnodes* gn)
     gn->validated = 1;
 
     if (gu_verbose)
-        fflush(stdout);
+        // fflush(stdout);
 }
 
 /* Makes a deep copy of grid nodes.
@@ -808,7 +808,7 @@ void gridnodes_write(gridnodes* gn, char* fname, COORDTYPE ctype)
     if (f != stdout)
         fclose(f);
     else
-        fflush(stdout);
+        // fflush(stdout);
 }
 
 static void gridstats_init(gridstats* gs)

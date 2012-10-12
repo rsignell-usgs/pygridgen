@@ -25,7 +25,7 @@
 #include "gridmap.h"
 #include "gucommon.h"
 
-#define M_PI 	3.141592653589793
+#define M_PI 3.14159265358979323846
 #define BUFSIZE 10240
 
 /* Deviation from Orthogonality = 90 - theta

@@ -29,7 +29,7 @@
 #include "nan.h"
 
 #define M_SQRT2 	1.4142135623730951
-#define M_SQRT1_2 	0.70710678118654757
+#define M_SQRT1_2 	0.7071067811865476
 #define SQRT2x3 	(M_SQRT2 * 3.0)
 
 void vertlist_init(vertlist* l)
