@@ -105,17 +105,17 @@ svn:wc:ra_dav:version-url
 V 32
 /svn/!svn/ver/1/nn/mkinstalldirs
 END
-makefile.in
-K 25
-svn:wc:ra_dav:version-url
-V 31
-/svn/!svn/ver/11/nn/makefile.in
-END
 LICENSE
 K 25
 svn:wc:ra_dav:version-url
 V 26
 /svn/!svn/ver/1/nn/LICENSE
+END
+makefile.in
+K 25
+svn:wc:ra_dav:version-url
+V 31
+/svn/!svn/ver/11/nn/makefile.in
 END
 delaunay.c
 K 25
@@ -141,17 +141,17 @@ svn:wc:ra_dav:version-url
 V 29
 /svn/!svn/ver/1/nn/delaunay.h
 END
-README
-K 25
-svn:wc:ra_dav:version-url
-V 26
-/svn/!svn/ver/14/nn/README
-END
 nn_internal.h
 K 25
 svn:wc:ra_dav:version-url
 V 32
 /svn/!svn/ver/1/nn/nn_internal.h
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 26
+/svn/!svn/ver/14/nn/README
 END
 config.h.in
 K 25
@@ -159,17 +159,17 @@ svn:wc:ra_dav:version-url
 V 30
 /svn/!svn/ver/1/nn/config.h.in
 END
-nn.h
-K 25
-svn:wc:ra_dav:version-url
-V 23
-/svn/!svn/ver/1/nn/nn.h
-END
 minell.c
 K 25
 svn:wc:ra_dav:version-url
 V 27
 /svn/!svn/ver/6/nn/minell.c
+END
+nn.h
+K 25
+svn:wc:ra_dav:version-url
+V 23
+/svn/!svn/ver/1/nn/nn.h
 END
 nan.h
 K 25

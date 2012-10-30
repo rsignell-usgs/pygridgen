@@ -887,9 +887,9 @@ class Gridgen(CGrid):
                  nnodes=14, precision=1.0e-12, nppe=3, \
                  newton=True, thin=True, checksimplepoly=True, verbose=False):
         
-        # self._libgridgen = np.ctypeslib.load_library('libgridgen', '/usr/local/lib')
-        print octant.__path__[0]
-        self._libgridgen = np.ctypeslib.load_library('_gridgen', octant.__path__[0])
+        self._libgridgen = np.ctypeslib.load_library('libgridgen', '/usr/local/lib')
+        # print octant.__path__[0]
+        # self._libgridgen = np.ctypeslib.load_library('_gridgen', octant.__path__[0])
         
         self._libgridgen.gridgen_generategrid2.restype = ctypes.c_void_p
         self._libgridgen.gridnodes_getx.restype = ctypes.POINTER(ctypes.POINTER(ctypes.c_double))
