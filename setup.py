@@ -64,6 +64,7 @@ if __name__ == '__main__':
           platforms = ["any"],
           ext_package='pygridgen',
           # ext_modules = [gridgen],
+          ext_modules = [csa], 
           classifiers = filter(None, classifiers.split("\n")),
           )
     
