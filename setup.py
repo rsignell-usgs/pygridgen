@@ -19,34 +19,9 @@ Topic :: Software Development :: Libraries :: Python Modules
 
 from numpy.distutils.core import Extension
 
-gridgen = Extension(name = '_gridgen',
-                    extra_compile_args=['-O2', ],
-                    sources=["pygridgen/src/csa.c",
-                             "pygridgen/src/svd.c",
-                             "pygridgen/src/delaunay.c",
-                             "pygridgen/src/hash.c",
-                             "pygridgen/src/istack.c",
-                             "pygridgen/src/lpi.c",
-                             "pygridgen/src/minell.c",
-                             "pygridgen/src/nnai.c",
-                             "pygridgen/src/nnbathy.c",
-                             "pygridgen/src/nncommon.c",
-                             "pygridgen/src/nncommon-vulnerable.c",
-                             "pygridgen/src/nnpi.c",
-                             "pygridgen/src/preader.c",
-                             "pygridgen/src/triangle.c",
-                             "pygridgen/src/gridmap.c",
-                             "pygridgen/src/gucommon.c",
-                             "pygridgen/src/poly.c",
-                             "pygridgen/src/broyden.c",
-                             "pygridgen/src/geom.c",
-                             "pygridgen/src/gridgen.c",
-                             "pygridgen/src/gridnodes.c",
-                             "pygridgen/src/issimplepoly.c",
-                             "pygridgen/src/ode.c",
-                             "pygridgen/src/swcr.c",
-                             "pygridgen/src/vertlist.c",
-                             "pygridgen/src/zode.c",])
+csa = Extension(name = '_csa',
+                sources=["pygridgen/src/csa/csa.c",
+                         "pygridgen/src/csa/svd.c"])
 
 doclines = __doc__.split("\n")
 
@@ -63,7 +38,6 @@ if __name__ == '__main__':
           license = 'BSD',
           platforms = ["any"],
           ext_package='pygridgen',
-          # ext_modules = [gridgen],
           ext_modules = [csa], 
           classifiers = filter(None, classifiers.split("\n")),
           )
