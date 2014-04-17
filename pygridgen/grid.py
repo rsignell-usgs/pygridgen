@@ -15,8 +15,13 @@ from matplotlib.artist import Artist
 from matplotlib.patches import Polygon, CirclePolygon
 from matplotlib.lines import Line2D
 from matplotlib.mlab import dist_point_to_segment
-from matplotlib.nxutils import points_inside_poly
+#from matplotlib.nxutils import points_inside_poly
 from mpl_toolkits.basemap import pyproj
+
+from matplotlib.path import Path
+def points_inside_poly(points, verts):
+    poly = Path(verts)
+    return [ind for ind, p in enumerate(points) if poly.contains_point(p)]
 
 
 class BoundaryInteractor(object):
@@ -379,7 +384,6 @@ class BoundaryInteractor(object):
     y = property(get_ydata)
     
 
-
 def _approximate_erf(x):
     '''Return approximate solution to error function
     
@@ -388,7 +392,7 @@ def _approximate_erf(x):
     a = -(8*(np.pi-3.0)/(3.0*np.pi*(np.pi-4.0)))
     return np.sign(x) * \
            np.sqrt(1.0 - np.exp( -x**2*(4.0/np.pi+a*x*x)/(1.0+a*x*x) ))
-    
+   
 
 class _Focus_x(object):
     """Return a transformed, uniform grid, focused in the x-direction
@@ -437,6 +441,7 @@ class _Focus_x(object):
         
         return (xf(x)-xf0)/(xf1-xf0), y
 
+
 class _Focus_y(object):
     """Return a transformed, uniform grid, focused in the y-direction
     
@@ -484,6 +489,7 @@ class _Focus_y(object):
         yf0 = yf(0.0); yf1 = yf(1.0)
         
         return x, (yf(y)-yf0)/(yf1-yf0)
+
 
 class Focus(object):
     """
@@ -718,8 +724,9 @@ class CGrid(object):
         
         mask = self.mask_rho
         inside = points_inside_poly(
-            np.vstack( (self.x_rho.flat, self.y_rho.flat) ).T,
-            polyverts)
+            np.vstack([self.x_rho.flat, self.y_rho.flat]).T,
+            polyverts
+        )
         if np.any(inside):
             self.mask_rho.flat[inside] = mask_value
     
