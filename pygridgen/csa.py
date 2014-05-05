@@ -1,5 +1,7 @@
 
 import sys
+import os
+import inspect
 
 import numpy as np
 import ctypes
@@ -56,7 +58,10 @@ class csa(object):
     
     '''
     
-    _csa = np.ctypeslib.load_library('_csa', pygridgen.__path__[0])
+    path = os.path.dirname(inspect.getfile(inspect.currentframe()))
+    _csa = np.ctypeslib.load_library('_csa', path)
+    #_csa = np.ctypeslib.load_library('_csa', pygridgen.__path__[0])
+
     
     
     _csa.csa_approximatepoints2.restype = ctypes.POINTER(ctypes.c_double)
