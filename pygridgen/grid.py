@@ -15,7 +15,7 @@ from matplotlib.artist import Artist
 from matplotlib.patches import Polygon, CirclePolygon
 from matplotlib.lines import Line2D
 from matplotlib.mlab import dist_point_to_segment
-from matplotlib.nxutils import points_inside_poly
+# from matplotlib.nxutils import points_inside_poly
 from mpl_toolkits.basemap import pyproj
 
 

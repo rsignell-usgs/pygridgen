@@ -38,7 +38,7 @@ if __name__ == '__main__':
           license = 'BSD',
           platforms = ["any"],
           ext_package='pygridgen',
-          ext_modules = [csa], 
+          ext_modules = [csa, ], 
           classifiers = filter(None, classifiers.split("\n")),
           )
     

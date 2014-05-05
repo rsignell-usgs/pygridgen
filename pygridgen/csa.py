@@ -56,7 +56,9 @@ class csa(object):
     
     '''
     
-    _csa = np.ctypeslib.load_library('_csa', pygridgen.__path__[0])
+    # _csa = np.ctypeslib.load_library('_csa', pygridgen.__path__[0])
+    
+    _csa = np.ctypeslib.load_library('_csa', '/Users/rob/Library/Enthought/Canopy_64bit/User/lib/python2.7/site-packages/pygridgen/')
     
     
     _csa.csa_approximatepoints2.restype = ctypes.POINTER(ctypes.c_double)
