@@ -182,23 +182,23 @@ class BoundaryInteractor(object):
                 self._line.set_data(zip(*self._poly.xy))
                 self.beta = [beta for i,beta in enumerate(self.beta) \
                              if i!=ind]
-        elif event.key=='P':
+        elif event.key=='p':
             ind = self._get_ind_under_point(event)
             if ind is not None:
                 self.beta[ind] = 1.0
-        elif event.key=='M':
+        elif event.key=='m':
             ind = self._get_ind_under_point(event)
             if ind is not None:
                 self.beta[ind] = -1.0
-        elif event.key=='Z':
+        elif event.key=='z':
             ind = self._get_ind_under_point(event)
             if ind is not None:
                 self.beta[ind] = 0.0
-        elif event.key=='S':
+        elif event.key=='s':
             ind = self._get_ind_under_point(event)
             if ind is not None:
                 self.gridgen_options['ul_idx'] = ind
-        elif event.key=='I':
+        elif event.key=='i':
             xys = self._poly.get_transform().transform(self._poly.xy)
             p = event.x, event.y # display coords
             for i in range(len(xys)-1):
@@ -866,15 +866,20 @@ class Gridgen(CGrid):
              ctypes.byref(xrect), 
              ctypes.byref(yrect) )
         
-        x = self._libgridgen.gridnodes_getx(self._gn)
-        x = np.asarray([x[0][i] for i in range(self.ny*self.nx)])
-        # x = np.asarray([x[j][i] for j in range(self.ny) for i in range(self.nx)])
-        x.shape = (self.ny, self.nx)
+        print 'step 3'
+        
+        # x = self._libgridgen.gridnodes_getx(self._gn)
+        # print 'step 4'
+        # x = np.asarray([x[0][i] for i in range(self.ny*self.nx)])
+        # # x = np.asarray([x[j][i] for j in range(self.ny) for i in range(self.nx)])
+        # x.shape = (self.ny, self.nx)
         
         y = self._libgridgen.gridnodes_gety(self._gn)    
         y = np.asarray([y[0][i] for i in range(self.ny*self.nx)])            
         # y = np.asarray([y[j][i] for j in range(self.ny) for i in range(self.nx)])
         y.shape = (self.ny, self.nx)
+        
+        print 'step 5'
         
         if np.any(np.isnan(x)) or np.any(np.isnan(y)):
             x = np.ma.masked_where(np.isnan(x), x)
@@ -893,7 +898,7 @@ class Gridgen(CGrid):
                  nnodes=14, precision=1.0e-12, nppe=3, \
                  newton=True, thin=True, checksimplepoly=True, verbose=False):
         
-        self._libgridgen = np.ctypeslib.load_library('libgridgen', '/usr/local/lib')
+        self._libgridgen = np.ctypeslib.load_library('libgridgen.so', '/usr/local/lib')
         # print octant.__path__[0]
         # self._libgridgen = np.ctypeslib.load_library('_gridgen', octant.__path__[0])
         
@@ -1096,8 +1101,10 @@ if __name__ == '__main__':
         y = [0.2, 0.25, 0.5, 0.82, .83]
         beta = [1.0, 1.0, 0.0, 1.0, 1.0]
         
-        grd = Gridgen(x, y, beta, (32, 32))
+        grd = Gridgen(x, y, beta, (32, 32), verbose=False)
         
-        ax = plt.subplot(111)
-        BoundaryInteractor(x, y, beta)
-        plt.show()
+        print grd.x
+        
+        # ax = plt.subplot(111)
+        # BoundaryInteractor(x, y, beta)
+        # plt.show()
