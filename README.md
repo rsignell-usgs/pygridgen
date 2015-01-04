@@ -1,5 +1,5 @@
 # pygridgen
-[![Build Status](https://travis-ci.org/phobson/pygridgen.svg?branch=develop)](https://travis-ci.org/phobson/pygridgen)
+[![Build Status](https://travis-ci.org/hetland/pygridgen.svg?branch=develop)](https://travis-ci.org/hetland/pygridgen)
 
 A Python interface to Pavel Sakov's C-based Gridgen Orthogonal Grid
 Generation Package

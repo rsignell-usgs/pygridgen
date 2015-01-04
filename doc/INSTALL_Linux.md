@@ -44,21 +44,7 @@ $ git clone https://github.com/geosyntec/pygridgen.git
 ### nearest neighbors
 ```
 $ cd nn
-$ ./configure
-```
-
-The edit the `makefile` and change this (line ~23):
-
-`CFLAGS_VULNERABLE = -fno-force-mem -ffloat-store`
-
-To say instead:
-
-`CFLAGS_VULNERABLE = -ffloat-store`
-
-After doing this, do *not* run `./configure` again.
-
-```
-$ sudo make install
+$ ./configure && sudo make install
 $ cd ..
 ```
 
