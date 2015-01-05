@@ -428,7 +428,7 @@ class _Focus_x(object):
         x = np.asarray(x)
         y = np.asarray(y)
         assert not np.any(x>1.0) or not np.any(x<0.0)  \
-            or not np.any(y>1.0) or not np.any(x<0.0), \
+            or not np.any(y>1.0) or not np.any(y<0.0), \
                 'x and y must both be within the range [0, 1].'
         
         alpha = 1.0 - 1.0/self.factor
@@ -476,7 +476,7 @@ class _Focus_y(object):
         x = np.asarray(x)
         y = np.asarray(y)
         assert not np.any(x>1.0) or not np.any(x<0.0)  \
-            or not np.any(y>1.0) or not np.any(x<0.0), \
+            or not np.any(y>1.0) or not np.any(y<0.0), \
                 'x and y must both be within the range [0, 1].'
         
         alpha = 1.0 - 1.0/self.factor
