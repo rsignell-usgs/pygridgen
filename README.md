@@ -14,7 +14,14 @@ Generation Package
   + **a single orthogonal grid as a result** - Whites whiter!
     Brights brighter!
 
-## Install
+## Install on Anaconda python distribution
+```
+conda create --name=grids python=2.7 nose pip ipython-notebook
+source activate grids
+conda install --channel=phobson nn csa gridutils gridgen pygridgen
+```
+
+## Install on other python distributions
 
 We are working on packaging using Bento or binstar. When that happens
 it'll be very easy to install. For now, here's a *very* rough outline.
